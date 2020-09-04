@@ -1,6 +1,8 @@
 #include <iostream>
 #include <vector>
 #include <stack>
+#include <map>
+#include <unordered_map>
 
 using namespace std;
 
@@ -9,6 +11,19 @@ struct ListNode {
     int val;
     ListNode *next;
     ListNode(int x) : val(x), next(NULL) {}
+};
+
+class Node {
+public:
+    int val;
+    Node* next;
+    Node* random;
+    
+    Node(int _val) {
+        val = _val;
+        next = NULL;
+        random = NULL;
+    }
 };
 
 // 链表类练习
@@ -152,5 +167,104 @@ namespace listDemo{
         ListNode* ret = dum->next;
         delete dum;
         return ret;
+    }
+
+    //复杂链表的复制
+    Node* copyRandomList(Node* head) {
+        if(head == NULL){
+            return NULL;
+        }
+        unordered_map<Node*, Node*> um;
+        Node* cur = head;
+        while(cur){
+            um.insert(make_pair(cur, new Node(cur->val)));
+            cur = cur->next;
+        }
+        cur = head;
+        while(cur){
+            Node* node = um.find(cur)->second;
+            if(cur->next){
+                node->next = um.find(cur->next)->second;
+            }
+            if(cur->random){
+                node->random = um.find(cur->random)->second;
+            }
+            cur = cur->next;
+        }
+        return um.find(head)->second;
+    }
+
+    namespace test1{
+        class Node {
+            public:
+                int val;
+                Node* left;
+                Node* right;
+
+                Node() {}
+
+                Node(int _val) {
+                    val = _val;
+                    left = NULL;
+                    right = NULL;
+                }
+
+                Node(int _val, Node* _left, Node* _right) {
+                    val = _val;
+                    left = _left;
+                    right = _right;
+                }
+        };
+        
+        Node* head = NULL;
+        Node* pre = NULL;
+
+        void bfs(Node* cur){
+            if(cur == NULL){
+                return;
+            }
+            bfs(cur->left);
+            if(pre == NULL){
+                head = cur;
+            }else{
+                pre->right = cur;
+            }
+            cur->left = pre;
+            pre = cur;
+            bfs(cur->right);
+        }
+
+        // 二叉搜索树转双向循环链表，左孩子指向前驱，右孩子指向后继
+        Node* treeToDoublyList(Node* root) {
+            if(root == NULL){
+                return NULL;
+            }
+            bfs(root);
+            head->left = pre;
+            pre->right = head;
+            return head;
+        }
+    }
+
+    // 两个链表的第一个公共节点
+    ListNode *getIntersectionNode(ListNode *headA, ListNode *headB) {
+        if(headA == NULL || headB == NULL){
+            return NULL;
+        }
+        ListNode* curA = headA;
+        ListNode* curB = headB;
+        while(curA != curB){
+            if(curA != NULL){
+                curA = curA->next;
+            }else{
+                curA = headB;
+            }
+            if(curB != NULL){
+                curB = curB->next;
+            }else{
+                curB = headA;
+            }
+        }
+        return curA;
     }
 }
