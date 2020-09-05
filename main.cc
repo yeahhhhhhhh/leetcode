@@ -2,6 +2,8 @@
 #include <vector>
 #include <unordered_map>
 #include <map>
+#include <queue>
+#include <deque>
 
 using namespace std;
 
@@ -92,5 +94,95 @@ namespace TreeDemo{
             return true;
         }
         return recur(root->left, root->right);
+    }
+
+    // 二叉树层次遍历，“之”字形打印
+    vector<vector<int>> levelOrder(TreeNode* root) {
+        if(root == NULL){
+            return {};
+        }
+        vector<vector<int> > ret;
+        deque<TreeNode*> q;
+        bool flag = true;
+        q.push_front(root);
+        while(q.size() > 0){
+            int size = q.size();
+            vector<int> subRet;
+            for(int i = 0; i < size; i++){
+                TreeNode* tmp = NULL;
+                if(flag){
+                    tmp = q.front();
+                    q.pop_front();
+                    subRet.push_back(tmp->val);
+                    if(tmp->left != NULL){
+                        q.push_back(tmp->left);
+                    }
+                    if(tmp->right != NULL){
+                        q.push_back(tmp->right);
+                    }
+                }else{
+                    tmp = q.back();
+                    q.pop_back();
+                    subRet.push_back(tmp->val);
+                    if(tmp->right != NULL){
+                        q.push_front(tmp->right);
+                    }
+                    if(tmp->left != NULL){
+                        q.push_front(tmp->left);
+                    }
+                }
+            }
+            flag = !flag;
+            ret.push_back(subRet);
+        }
+        return ret;
+    }
+
+    bool recur(vector<int>& postorder, int i, int j){
+        if(i >= j){
+            return true;
+        }
+        int p = i;
+        while(postorder[p] < postorder[j]){
+            p++;
+        }
+        int m = p;
+        while(postorder[p] > postorder[j]){
+            p++;
+        }
+        return (p == j) && recur(postorder, i, m - 1) && recur(postorder, m, j - 1);
+    }
+
+    // 利用二叉树的后序遍历判断是否是二叉搜索树——暴力递归n2
+    bool verifyPostorder(vector<int>& postorder) {
+        if(postorder.size() == 0){
+            return true;
+        }
+        return recur(postorder, 0, postorder.size() - 1);
+    }
+
+    void recur(TreeNode* root, int target, vector<int>& path, vector<vector<int> >& ret){
+        if(root == NULL){
+            return;
+        }
+        target -= root->val;
+        path.push_back(root->val);
+        if(target == 0 && root->left == NULL && root->right == NULL){
+            ret.push_back(path);
+        }
+        recur(root->left, target, path, ret);
+        recur(root->right, target, path, ret);
+        path.pop_back();
+    }
+
+    // 二叉树中和为某一值的路径
+    vector<vector<int>> pathSum(TreeNode* root, int sum) {
+        if(root == NULL){
+            return {};
+        }
+        vector<vector<int> > ret;
+        vector<int> path;
+        recur(root, sum, path, ret);
+        return ret; 
     }
 }
